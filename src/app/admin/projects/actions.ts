@@ -208,6 +208,8 @@ export async function createProject(formData: FormData): Promise<ActionResult> {
   }
 
   revalidatePath('/admin/projects');
+  revalidatePath('/en');
+  revalidatePath('/es');
   return { ok: true, data: { id: newId } };
 }
 
@@ -270,6 +272,8 @@ export async function updateProject(id: string, formData: FormData): Promise<Act
   }
 
   revalidatePath('/admin/projects');
+  revalidatePath('/en');
+  revalidatePath('/es');
   return { ok: true, data: { id } };
 }
 
@@ -331,6 +335,8 @@ export async function deleteProject(id: string): Promise<ActionResult> {
   }
 
   revalidatePath('/admin/projects');
+  revalidatePath('/en');
+  revalidatePath('/es');
   return { ok: true, data: { id } };
 }
 
@@ -375,5 +381,7 @@ export async function togglePublished(id: string, currentRow: ToggleRow): Promis
   }
 
   revalidatePath('/admin/projects');
+  revalidatePath('/en');
+  revalidatePath('/es');
   return { ok: true, data: { id } };
 }

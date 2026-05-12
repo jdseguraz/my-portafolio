@@ -250,6 +250,20 @@ describe('createProject', () => {
     await createProject(makeFormData(validDraftPayload));
     expect(revalidatePath).toHaveBeenCalledWith('/admin/projects');
   });
+
+  it('revalidates public locale paths /en and /es on success (FR-126, ADR-43)', async () => {
+    const { createProject } = await getActions();
+    await createProject(makeFormData(validDraftPayload));
+    expect(revalidatePath).toHaveBeenCalledWith('/en');
+    expect(revalidatePath).toHaveBeenCalledWith('/es');
+  });
+
+  it('does NOT revalidate /en or /es on validation failure (FR-126)', async () => {
+    const { createProject } = await getActions();
+    await createProject(makeFormData(incompletePublishPayload));
+    expect(revalidatePath).not.toHaveBeenCalledWith('/en');
+    expect(revalidatePath).not.toHaveBeenCalledWith('/es');
+  });
 });
 
 describe('updateProject', () => {
@@ -273,6 +287,24 @@ describe('updateProject', () => {
       expect(result.errors.cover_image_url).toBeTruthy();
     }
     expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it('revalidates /en and /es on success (FR-126, ADR-43)', async () => {
+    const mockEqChain = vi.fn().mockResolvedValue({ data: null, error: null });
+    mockUpdate.mockReturnValue({ eq: mockEqChain });
+
+    const { updateProject } = await getActions();
+    await updateProject('target-id', makeFormData(validDraftPayload));
+    expect(revalidatePath).toHaveBeenCalledWith('/en');
+    expect(revalidatePath).toHaveBeenCalledWith('/es');
+  });
+
+  it('does NOT revalidate /en or /es on validation failure (FR-126)', async () => {
+    const { updateProject } = await getActions();
+    await updateProject('target-id', makeFormData(validPublishPayload));
+    // validPublishPayload has no cover_image_url → validation fails → no revalidation
+    expect(revalidatePath).not.toHaveBeenCalledWith('/en');
+    expect(revalidatePath).not.toHaveBeenCalledWith('/es');
   });
 });
 
@@ -361,6 +393,26 @@ describe('deleteProject', () => {
       expect(result.errors._form).toMatch(/storage/i);
     }
     expect(mockDelete).not.toHaveBeenCalled();
+  });
+
+  it('revalidates /en and /es on success (FR-126, ADR-43)', async () => {
+    mockStorageList.mockResolvedValue({ data: [], error: null });
+    const mockEqChain = vi.fn().mockResolvedValue({ data: null, error: null });
+    mockDelete.mockReturnValue({ eq: mockEqChain });
+
+    const { deleteProject } = await getActions();
+    await deleteProject('del-id');
+    expect(revalidatePath).toHaveBeenCalledWith('/en');
+    expect(revalidatePath).toHaveBeenCalledWith('/es');
+  });
+
+  it('does NOT revalidate /en or /es when Storage list fails (FR-126)', async () => {
+    mockStorageList.mockResolvedValue({ data: null, error: { message: 'Storage list failed' } });
+
+    const { deleteProject } = await getActions();
+    await deleteProject('proj-id');
+    expect(revalidatePath).not.toHaveBeenCalledWith('/en');
+    expect(revalidatePath).not.toHaveBeenCalledWith('/es');
   });
 });
 
@@ -546,5 +598,36 @@ describe('togglePublished', () => {
 
     expect(result.ok).toBe(true);
     expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ published: false }));
+  });
+
+  it('revalidates /en and /es on success (FR-126, ADR-43)', async () => {
+    const mockEqChain = vi.fn().mockResolvedValue({ data: null, error: null });
+    mockUpdate.mockReturnValue({ eq: mockEqChain });
+
+    const { togglePublished } = await getActions();
+    const completeRow = {
+      title_en: 'Title', title_es: 'Titulo',
+      subtitle_en: 'Sub', subtitle_es: 'Sub',
+      description_en: 'Desc', description_es: 'Desc',
+      slug: 'slug',
+      cover_image_url: 'https://example.com/cover.webp',
+      published: false,
+    };
+    await togglePublished('some-id', completeRow);
+    expect(revalidatePath).toHaveBeenCalledWith('/en');
+    expect(revalidatePath).toHaveBeenCalledWith('/es');
+  });
+
+  it('does NOT revalidate /en or /es on validation failure (FR-126)', async () => {
+    const { togglePublished } = await getActions();
+    const incompleteRow = {
+      title_en: 'T', title_es: '', // missing title_es → fails validation
+      subtitle_en: 'S', subtitle_es: 'S',
+      description_en: 'D', description_es: 'D',
+      slug: 'slug', cover_image_url: null, published: false,
+    };
+    await togglePublished('some-id', incompleteRow);
+    expect(revalidatePath).not.toHaveBeenCalledWith('/en');
+    expect(revalidatePath).not.toHaveBeenCalledWith('/es');
   });
 });
