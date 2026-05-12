@@ -41,12 +41,25 @@ vi.mock('motion/react', () => ({
 }));
 
 // ---------------------------------------------------------------------------
-// Mock lucide-react icons (v1 removed Github/Linkedin branded icons; using ExternalLink + Globe)
+// Mock lucide-react — only Mail is still used in HeroMotion (ADR-74)
 // ---------------------------------------------------------------------------
 vi.mock('lucide-react', () => ({
-  ExternalLink: ({ 'aria-label': label }: { 'aria-label'?: string }) => <svg aria-label={label} data-testid="icon-github" />,
-  Globe: ({ 'aria-label': label }: { 'aria-label'?: string }) => <svg aria-label={label} data-testid="icon-linkedin" />,
   Mail: ({ 'aria-label': label }: { 'aria-label'?: string }) => <svg aria-label={label} data-testid="icon-mail" />,
+}));
+
+// ---------------------------------------------------------------------------
+// Mock brand icon components — inline SVG replacements (ADR-74, FR-190)
+// ---------------------------------------------------------------------------
+vi.mock('../../src/components/icons/GitHubIcon', () => ({
+  default: ({ ariaLabel }: { ariaLabel?: string; size?: number; className?: string }) => (
+    <svg aria-label={ariaLabel} data-testid="icon-github" viewBox="0 0 24 24" />
+  ),
+}));
+
+vi.mock('../../src/components/icons/LinkedInIcon', () => ({
+  default: ({ ariaLabel }: { ariaLabel?: string; size?: number; className?: string }) => (
+    <svg aria-label={ariaLabel} data-testid="icon-linkedin" viewBox="0 0 24 24" />
+  ),
 }));
 
 // ---------------------------------------------------------------------------

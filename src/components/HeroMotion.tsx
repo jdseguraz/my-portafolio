@@ -9,9 +9,9 @@
  */
 
 import { motion, useReducedMotion } from 'motion/react';
-// Note: lucide-react v1 removed branded icons (Github, Linkedin).
-// Using ExternalLink + Globe as functional proxies with aria-labels for accessibility.
-import { ExternalLink, Globe, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
+import GitHubIcon from '@/components/icons/GitHubIcon';
+import LinkedInIcon from '@/components/icons/LinkedInIcon';
 
 export interface HeroMotionProps {
   title: string;
@@ -71,7 +71,7 @@ export default function HeroMotion({
           aria-label="GitHub"
           className="opacity-70 hover:opacity-100 transition-opacity"
         >
-          <ExternalLink size={24} aria-label="GitHub" />
+          <GitHubIcon size={24} ariaLabel="GitHub" />
         </a>
         <a
           href={linkedinUrl}
@@ -80,7 +80,7 @@ export default function HeroMotion({
           aria-label="LinkedIn"
           className="opacity-70 hover:opacity-100 transition-opacity"
         >
-          <Globe size={24} aria-label="LinkedIn" />
+          <LinkedInIcon size={24} ariaLabel="LinkedIn" />
         </a>
         <a
           href={`mailto:${email}`}
