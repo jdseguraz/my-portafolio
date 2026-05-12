@@ -20,6 +20,19 @@ const nextConfig: NextConfig = {
         hostname: '*.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      // TODO Fase 5/6 cleanup: temporary picsum.photos allowance for seeded test
+      // projects. Remove before production deploy once real cover/gallery images
+      // are uploaded via the admin UI.
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fastly.picsum.photos',
+        pathname: '/**',
+      },
     ],
   },
 };
