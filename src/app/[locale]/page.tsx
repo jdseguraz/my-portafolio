@@ -45,13 +45,13 @@ export default async function HomePage({ params }: Props) {
   const safeProjects = projects ?? [];
 
   return (
-    <main className="min-h-screen px-4 py-12 max-w-7xl mx-auto">
+    <div className="min-h-screen px-4 py-12 max-w-7xl mx-auto">
       <Hero />
       {safeProjects.length === 0 ? (
         <EmptyState />
       ) : (
         <MasonryGallery projects={safeProjects} locale={locale} />
       )}
-    </main>
+    </div>
   );
 }
