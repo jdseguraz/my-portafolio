@@ -2,33 +2,88 @@
 
 /**
  * GalleryUploader — controlled client component for managing a project's gallery.
- * FR-88, FR-90, FR-101, C-14 (UUID-based naming via SA).
- * NO drag-and-drop reorder — that is PR3 scope (dnd-kit, ADR-38).
+ * FR-88, FR-89, FR-90, FR-101, C-14 (UUID-based naming via SA).
+ * PR3: dnd-kit drag-and-drop reorder (ADR-38).
  *
  * Props:
  *   projectId: string | null — needed to call upload/delete SAs.
  *              Null in create mode (files collected for parent SA sequencing, ADR-37).
  *   value: string[]          — ordered list of current gallery image public URLs.
  *   onChange: (urls: string[]) => void — called with updated URLs after upload/delete.
+ *   onReorder?: (newOrder: string[]) => void — optional override for testing / a11y.
  */
 
 import { useState, useRef } from 'react';
-import { uploadGalleryFile, deleteGalleryFile } from '@/app/admin/projects/upload-actions';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  horizontalListSortingStrategy,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
+import { uploadGalleryFile, deleteGalleryFile, reorderGallery } from '@/app/admin/projects/upload-actions';
 import { ALLOWED_MIME_TYPES, validateFile } from '@/lib/storage/upload';
+import SortableGalleryItem from './SortableGalleryItem';
 
 type Props = {
   projectId: string | null;
   value: string[];
   onChange: (urls: string[]) => void;
+  /** Optional override — used by tests and a11y keyboard fallback to trigger reorder. */
+  onReorder?: (newOrder: string[]) => void;
 };
 
-export default function GalleryUploader({ projectId, value, onChange }: Props) {
+export default function GalleryUploader({ projectId, value, onChange, onReorder }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [deletingUrl, setDeletingUrl] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const acceptList = ALLOWED_MIME_TYPES.join(',');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = value.indexOf(active.id as string);
+    const newIndex = value.indexOf(over.id as string);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const next = arrayMove(value, oldIndex, newIndex);
+
+    // Optimistic update
+    onChange(next);
+
+    if (onReorder) {
+      onReorder(next);
+      return;
+    }
+
+    if (!projectId) return;
+
+    const result = await reorderGallery(projectId, next);
+    if (!result.ok) {
+      // Revert on SA error
+      onChange(value);
+      const errMsg =
+        (result as { ok: false; errors: Record<string, string> }).errors._form ||
+        'Reorder failed';
+      setError(errMsg);
+    }
+  }
 
   async function handleFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -109,28 +164,26 @@ export default function GalleryUploader({ projectId, value, onChange }: Props) {
 
   return (
     <div className="space-y-3">
-      {/* Thumbnail grid */}
+      {/* Thumbnail grid with dnd-kit reorder (ADR-38) */}
       {value.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {value.map((url) => (
-            <div key={url} className="relative group">
-              <img
-                src={url}
-                alt="Gallery image"
-                className="h-24 w-32 object-cover rounded-md border"
-              />
-              <button
-                type="button"
-                aria-label={`Delete ${url}`}
-                onClick={() => handleDelete(url)}
-                disabled={deletingUrl === url || uploading}
-                className="absolute top-1 right-1 rounded-full bg-black/60 text-white w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-30"
-              >
-                ×
-              </button>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={value} strategy={horizontalListSortingStrategy}>
+            <div className="flex flex-wrap gap-2">
+              {value.map((url) => (
+                <SortableGalleryItem
+                  key={url}
+                  id={url}
+                  url={url}
+                  onDelete={() => handleDelete(url)}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {/* File input */}
