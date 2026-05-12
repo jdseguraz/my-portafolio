@@ -9,7 +9,6 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 // ---------------------------------------------------------------------------
 // Mock: uploadCover Server Action
@@ -23,7 +22,6 @@ vi.mock('@/app/admin/projects/upload-actions', () => ({
 // ---------------------------------------------------------------------------
 // Import component AFTER mocks
 // ---------------------------------------------------------------------------
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { default: CoverUploader } = await import('../../src/components/admin/CoverUploader');
 
 // ---------------------------------------------------------------------------

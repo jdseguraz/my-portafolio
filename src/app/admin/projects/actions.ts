@@ -15,7 +15,7 @@ import { requireAdminSession } from '@/lib/auth/require-session';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { slugify } from '@/lib/projects/slug';
 import { validateForPublish } from '@/lib/projects/validation';
-import { doCoverUpload, doGalleryUpload, BUCKET } from '@/lib/storage/upload-internals';
+import { doCoverUpload, doGalleryUpload, BUCKET, type StorageClient } from '@/lib/storage/upload-internals';
 import { validateFile } from '@/lib/storage/upload';
 import { revalidatePath } from 'next/cache';
 
@@ -147,13 +147,15 @@ export async function createProject(formData: FormData): Promise<ActionResult> {
   const newId = (data as Array<{ id: string }> | null)?.[0]?.id ?? '';
 
   // 2. Upload files if any (ADR-37: rollback on failure)
+  // Cast to StorageClient to avoid TypeScript deep inference on typed Supabase client
+  const supabaseForStorage = supabase as unknown as StorageClient;
   let coverUrl: string | null = null;
   const galleryUrls: string[] = [];
   const uploadedPaths: string[] = [];
 
   if (hasCover && coverFile && newId) {
     try {
-      coverUrl = await doCoverUpload(supabase, newId, coverFile);
+      coverUrl = await doCoverUpload(supabaseForStorage, newId, coverFile);
       // Track path for rollback (extract from URL)
       const bucketMarker = `/${BUCKET}/`;
       const idx = coverUrl.indexOf(bucketMarker);
@@ -169,7 +171,7 @@ export async function createProject(formData: FormData): Promise<ActionResult> {
   for (const f of galleryFiles) {
     if (!newId) break;
     try {
-      const galleryUrl = await doGalleryUpload(supabase, newId, f);
+      const galleryUrl = await doGalleryUpload(supabaseForStorage, newId, f);
       galleryUrls.push(galleryUrl);
       const bucketMarker = `/${BUCKET}/`;
       const idx = galleryUrl.indexOf(bucketMarker);

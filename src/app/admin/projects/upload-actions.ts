@@ -11,7 +11,7 @@ import 'server-only';
 
 import { requireAdminSession } from '@/lib/auth/require-session';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { doCoverUpload, doGalleryUpload, BUCKET } from '@/lib/storage/upload-internals';
+import { doCoverUpload, doGalleryUpload, BUCKET, type StorageClient } from '@/lib/storage/upload-internals';
 import { revalidatePath } from 'next/cache';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -56,10 +56,12 @@ export async function uploadCover(
   }
 
   const supabase = createAdminClient();
+  // Cast to StorageClient to avoid deep type instantiation on the typed Supabase client
+  const supabaseForStorage = supabase as unknown as StorageClient;
 
   let url: string;
   try {
-    url = await doCoverUpload(supabase, projectId, file);
+    url = await doCoverUpload(supabaseForStorage, projectId, file);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Upload failed';
     if (msg === 'File too large') {
@@ -106,10 +108,11 @@ export async function uploadGalleryFile(
   }
 
   const supabase = createAdminClient();
+  const supabaseForStorage = supabase as unknown as StorageClient;
 
   let url: string;
   try {
-    url = await doGalleryUpload(supabase, projectId, file);
+    url = await doGalleryUpload(supabaseForStorage, projectId, file);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Upload failed';
     if (msg === 'File too large') {

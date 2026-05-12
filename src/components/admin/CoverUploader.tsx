@@ -13,7 +13,7 @@
 
 import { useState, useRef } from 'react';
 import { uploadCover } from '@/app/admin/projects/upload-actions';
-import { MAX_FILE_SIZE_BYTES, ALLOWED_MIME_TYPES, validateFile } from '@/lib/storage/upload';
+import { ALLOWED_MIME_TYPES, validateFile } from '@/lib/storage/upload';
 
 type Props = {
   projectId: string | null;

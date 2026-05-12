@@ -10,7 +10,7 @@
  *   - next/cache (revalidatePath)
  *   - server-only (handled by global setup.ts)
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Mock: requireAdminSession
@@ -55,7 +55,6 @@ vi.mock('@/lib/supabase/admin', () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 import { requireAdminSession } from '@/lib/auth/require-session';
-import { redirect } from 'next/navigation';
 
 // We ALSO mock next/navigation so redirect() throws (simulating auth failure path)
 vi.mock('next/navigation', () => ({
@@ -77,7 +76,7 @@ const PROJECT_ID = 'proj-123';
 const BASE_URL = 'https://example.supabase.co/storage/v1/object/public/project-images';
 const COVER_WEBP_URL = `${BASE_URL}/${PROJECT_ID}/cover.webp`;
 const COVER_PNG_URL = `${BASE_URL}/${PROJECT_ID}/cover.png`;
-const GALLERY_URL = `${BASE_URL}/${PROJECT_ID}/gallery/some-uuid.jpg`;
+// GALLERY_URL not used in assertions directly (path derived by SA from URL)
 
 /** Default happy-path mock setup */
 function setupHappyMocks({

@@ -25,7 +25,6 @@ vi.mock('@/app/admin/projects/upload-actions', () => ({
 // ---------------------------------------------------------------------------
 // Import component AFTER mocks
 // ---------------------------------------------------------------------------
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { default: GalleryUploader } = await import('../../src/components/admin/GalleryUploader');
 
 // ---------------------------------------------------------------------------

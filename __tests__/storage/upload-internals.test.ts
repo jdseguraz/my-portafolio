@@ -5,7 +5,7 @@
  * Strict TDD: RED phase — written before impl is verified green.
  * Mocks: @/lib/supabase/admin (manual stub of storage chain + from/select chain)
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { doCoverUpload, doGalleryUpload } from '../../src/lib/storage/upload-internals';
 
 // ---------------------------------------------------------------------------
