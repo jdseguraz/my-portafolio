@@ -106,12 +106,15 @@ export async function createProject(formData: FormData): Promise<ActionResult> {
   }
 
   // ADR-20: Validate required fields if publishing
+  // For create-mode: cover_image_url will be uploaded post-insert (ADR-37),
+  // so treat a provided cover file as equivalent to a URL for validation purposes.
   if (published) {
     const validation = validateForPublish({
       title_en, title_es,
       subtitle_en, subtitle_es,
       description_en, description_es,
       slug,
+      cover_image_url: hasCover ? 'pending-upload' : null,
     });
     if (!validation.ok) {
       return { ok: false, errors: validation.errors };

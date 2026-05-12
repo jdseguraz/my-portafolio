@@ -500,7 +500,7 @@ describe('togglePublished', () => {
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
-  it('togglePublished to true with all valid fields calls update', async () => {
+  it('togglePublished to true with all valid fields (including cover) calls update', async () => {
     const mockEqChain = vi.fn().mockResolvedValue({ data: null, error: null });
     mockUpdate.mockReturnValue({ eq: mockEqChain });
 
@@ -509,7 +509,9 @@ describe('togglePublished', () => {
       title_en: 'Title', title_es: 'Titulo',
       subtitle_en: 'Sub', subtitle_es: 'Sub',
       description_en: 'Desc', description_es: 'Desc',
-      slug: 'slug', cover_image_url: null, published: false,
+      slug: 'slug',
+      cover_image_url: 'https://example.com/cover.webp', // FR-95: cover required to publish
+      published: false,
     };
     const result = await togglePublished('some-id', completeRow);
 
