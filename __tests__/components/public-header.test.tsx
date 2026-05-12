@@ -26,9 +26,9 @@ vi.mock('next-intl/server', () => ({
 // ---------------------------------------------------------------------------
 vi.mock('../../src/components/Logo', () => ({
   default: ({ ariaLabel }: { ariaLabel: string }) => (
-    <a data-testid="logo" aria-label={ariaLabel} href="/">
+    <div data-testid="logo" aria-label={ariaLabel} role="link">
       JS
-    </a>
+    </div>
   ),
 }));
 

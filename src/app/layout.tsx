@@ -14,8 +14,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // TODO Fase 5: make lang dynamic per locale. Root layout cannot read params; restructuring deferred to Fase 5 SEO pass. (ADR-52, C-17)
   return (
-    {/* TODO Fase 5: make lang dynamic per locale. Root layout cannot read params; restructuring deferred to Fase 5 SEO pass. (ADR-52, C-17) */}
     <html
       lang="en"
       className={`${GeistSans.variable} ${GeistMono.variable}`}
