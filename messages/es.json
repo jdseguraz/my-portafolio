@@ -1,0 +1,20 @@
+{
+  "hero": {
+    "title": "Juan Segura — Desarrollador",
+    "subtitle": "Construyendo productos digitales con criterio",
+    "tagline": "Construyendo cosas en la web."
+  },
+  "gallery": {
+    "empty": "Sin proyectos por ahora — volvé pronto."
+  },
+  "meta": {
+    "title": "Juan Segura — Portafolio de Developer",
+    "description": "Proyectos y escritos seleccionados."
+  },
+  "header": {
+    "logoAlt": "Inicio del portafolio de Juan Segura"
+  },
+  "nav": {
+    "backToGallery": "Volver a la galería"
+  }
+}

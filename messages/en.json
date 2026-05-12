@@ -1,0 +1,20 @@
+{
+  "hero": {
+    "title": "Juan Segura — Developer",
+    "subtitle": "Building thoughtful digital products",
+    "tagline": "Building thoughtful digital products."
+  },
+  "gallery": {
+    "empty": "No projects yet — check back soon."
+  },
+  "meta": {
+    "title": "Juan Segura — Developer Portfolio",
+    "description": "Selected projects and writing."
+  },
+  "header": {
+    "logoAlt": "Juan Segura's portfolio home"
+  },
+  "nav": {
+    "backToGallery": "Back to gallery"
+  }
+}
