@@ -13,7 +13,7 @@
  *   onReorder?: (newOrder: string[]) => void — optional override for testing / a11y.
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -45,7 +45,18 @@ export default function GalleryUploader({ projectId, value, onChange, onReorder 
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [deletingUrl, setDeletingUrl] = useState<string | null>(null);
+  // Create-mode pending files: surfaced as blob previews; the actual File objects
+  // remain in the native <input name="gallery"> so the form's SA sequencing
+  // (ADR-37) receives them via FormData.getAll('gallery').
+  const [pendingPreviews, setPendingPreviews] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Revoke object URLs on unmount/replace to avoid memory leaks.
+  useEffect(() => {
+    return () => {
+      pendingPreviews.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [pendingPreviews]);
 
   const acceptList = ALLOWED_MIME_TYPES.join(',');
 
@@ -102,9 +113,11 @@ export default function GalleryUploader({ projectId, value, onChange, onReorder 
     }
 
     if (!projectId) {
-      // Create mode: parent form owns the files.
-      // We don't have an ID yet so we can't upload. Just preview locally.
-      // The files will be collected from FormData in the parent form's SA call (ADR-37).
+      // Create mode: keep files in the native <input name="gallery"> for the parent
+      // form's SA sequencing (ADR-37). Surface blob previews so the user sees what
+      // they staged. Do NOT clear the input (the files must survive until submit).
+      pendingPreviews.forEach((u) => URL.revokeObjectURL(u));
+      setPendingPreviews(files.map((f) => URL.createObjectURL(f)));
       return;
     }
 
@@ -187,12 +200,31 @@ export default function GalleryUploader({ projectId, value, onChange, onReorder 
         </DndContext>
       )}
 
+      {/* Create-mode pending previews — staged files awaiting SA upload on submit. */}
+      {pendingPreviews.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {pendingPreviews.map((src, i) => (
+            <div key={`${src}-${i}`} className="relative">
+              <img
+                src={src}
+                alt={`Pending gallery image ${i + 1}`}
+                className="h-24 w-32 object-cover rounded-md border opacity-80"
+              />
+              <span className="absolute bottom-1 left-1 text-[10px] bg-foreground/70 text-background px-1 rounded">
+                pending
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* File input */}
       <label className="cursor-pointer inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors">
         {uploading ? 'Uploading…' : 'Add images'}
         <input
           ref={inputRef}
           type="file"
+          name="gallery"
           accept={acceptList}
           multiple
           onChange={handleFilesChange}

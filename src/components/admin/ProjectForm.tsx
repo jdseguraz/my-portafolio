@@ -79,29 +79,25 @@ export default function ProjectForm({ initial, action, mode, projectId = null }:
   const [tab, setTab] = useState<'en' | 'es'>('en');
   const slugTouched = useRef(false);
 
-  // Build a FormData from the current state and pass it to the action
+  // Submit strategy: use the native FormData (so file inputs from CoverUploader
+  // and GalleryUploader flow through naturally) and overlay React state on top.
+  // `set` is used so re-submits don't accumulate duplicate text fields.
   async function handleAction(_prev: ActionResult, nativeFormData: FormData): Promise<ActionResult> {
-    // Rebuild FormData from current React state (bypasses hidden inputs approach)
-    const fd = new FormData();
-    fd.append('title_en', state.en.title);
-    fd.append('title_es', state.es.title);
-    fd.append('subtitle_en', state.en.subtitle);
-    fd.append('subtitle_es', state.es.subtitle);
-    fd.append('description_en', state.en.description);
-    fd.append('description_es', state.es.description);
-    fd.append('slug', state.slug);
-    fd.append('tags', JSON.stringify(state.tags));
-    fd.append('display_order', String(state.display_order));
-    fd.append('cover_image_url', state.cover_image_url);
-    fd.append('gallery_images', JSON.stringify(state.gallery_images));
-    fd.append('published', String(state.published));
-    // In create mode, carry over file inputs from nativeFormData (ADR-37 Option B):
-    // CoverUploader and GalleryUploader store file references via the native form
-    // inputs when projectId is null — the SA handles sequencing internally.
-    for (const [key, val] of nativeFormData.entries()) {
-      if (!fd.has(key)) fd.append(key, val);
-    }
-    return await action(fd);
+    nativeFormData.set('title_en', state.en.title);
+    nativeFormData.set('title_es', state.es.title);
+    nativeFormData.set('subtitle_en', state.en.subtitle);
+    nativeFormData.set('subtitle_es', state.es.subtitle);
+    nativeFormData.set('description_en', state.en.description);
+    nativeFormData.set('description_es', state.es.description);
+    nativeFormData.set('slug', state.slug);
+    nativeFormData.set('tags', JSON.stringify(state.tags));
+    nativeFormData.set('display_order', String(state.display_order));
+    nativeFormData.set('cover_image_url', state.cover_image_url);
+    nativeFormData.set('gallery_images', JSON.stringify(state.gallery_images));
+    nativeFormData.set('published', String(state.published));
+    // Native multi-file <input name="gallery"> entries remain intact via FormData.getAll('gallery').
+    // Native <input name="cover"> file remains intact via FormData.get('cover').
+    return await action(nativeFormData);
   }
 
   const [result, formAction, pending] = useActionState<ActionResult, FormData>(

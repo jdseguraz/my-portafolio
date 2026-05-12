@@ -11,7 +11,7 @@
  *   onChange: (url: string) => void — called with the new public URL after successful upload.
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { uploadCover } from '@/app/admin/projects/upload-actions';
 import { ALLOWED_MIME_TYPES, validateFile } from '@/lib/storage/upload';
 
@@ -24,7 +24,18 @@ type Props = {
 export default function CoverUploader({ projectId, value, onChange }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  // In create-mode the parent's `value` stays empty; we surface a local blob preview
+  // so the user sees the selected file before form submit. ProjectForm's native
+  // FormData picks up the File via the input's `name="cover"` for the SA sequencing.
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Revoke any previous object URL on change/unmount to avoid memory leaks.
+  useEffect(() => {
+    return () => {
+      if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    };
+  }, [pendingPreview]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -42,17 +53,11 @@ export default function CoverUploader({ projectId, value, onChange }: Props) {
     }
 
     if (!projectId) {
-      // Create mode: parent form owns the file; just store on parent via onChange
-      // For create-mode, we surface the file via a data URL preview and let the
-      // parent form SA handle upload sequencing (ADR-37, Option B).
-      // We cannot upload without a projectId, so just show preview.
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        if (ev.target?.result && typeof ev.target.result === 'string') {
-          onChange(ev.target.result);
-        }
-      };
-      reader.readAsDataURL(file);
+      // Create mode: keep file in the native input (name="cover") for the parent
+      // form's SA sequencing (ADR-37). Local blob preview for UX; do NOT touch
+      // parent state so cover_image_url stays empty until the SA uploads + UPDATEs.
+      if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+      setPendingPreview(URL.createObjectURL(file));
       return;
     }
 
@@ -82,14 +87,15 @@ export default function CoverUploader({ projectId, value, onChange }: Props) {
   }
 
   const acceptList = ALLOWED_MIME_TYPES.join(',');
+  const previewSrc = value || pendingPreview;
 
   return (
     <div className="space-y-2">
-      {/* Thumbnail preview (edit mode or after upload) */}
-      {value && (
+      {/* Thumbnail preview (edit mode value, or pending file in create mode) */}
+      {previewSrc && (
         <div className="relative inline-block">
           <img
-            src={value}
+            src={previewSrc}
             alt="Cover preview"
             className="h-32 w-48 object-cover rounded-md border"
           />
@@ -101,7 +107,7 @@ export default function CoverUploader({ projectId, value, onChange }: Props) {
         <label className="cursor-pointer inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors">
           {uploading ? (
             'Uploading…'
-          ) : value ? (
+          ) : previewSrc ? (
             'Replace'
           ) : (
             'Choose file'
@@ -109,6 +115,7 @@ export default function CoverUploader({ projectId, value, onChange }: Props) {
           <input
             ref={inputRef}
             type="file"
+            name="cover"
             accept={acceptList}
             onChange={handleFileChange}
             disabled={uploading}
@@ -116,9 +123,9 @@ export default function CoverUploader({ projectId, value, onChange }: Props) {
           />
         </label>
 
-        {value && !uploading && (
+        {previewSrc && !uploading && (
           <span className="text-xs opacity-60 truncate max-w-xs">
-            Cover uploaded
+            {projectId ? 'Cover uploaded' : 'Cover ready — saves on submit'}
           </span>
         )}
       </div>
