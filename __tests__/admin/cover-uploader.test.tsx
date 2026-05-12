@@ -46,14 +46,10 @@ describe('CoverUploader', () => {
   });
 
   describe('empty state', () => {
-    it('renders file input visible', () => {
+    it('renders file input in the DOM', () => {
       render(
         <CoverUploader projectId={PROJECT_ID} value={null} onChange={vi.fn()} />,
       );
-      const input = screen.getByRole('button', { hidden: true })
-        // fallback: just find any input[type=file]
-        || document.querySelector('input[type="file"]');
-      // We allow the input to be found either way
       const fileInput = document.querySelector('input[type="file"]');
       expect(fileInput).not.toBeNull();
     });
