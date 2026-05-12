@@ -23,13 +23,9 @@ const mockEqPublishedList = vi.fn(() => ({ order: mockOrder1 }));
 const mockSelectSingle = vi.fn(() => ({ eq: mockEqSlug }));
 const mockSelectList = vi.fn(() => ({ eq: mockEqPublishedList }));
 
-// The `from` mock returns different chains based on call sequence.
-// Since both functions call from('projects'), we track by select call.
-let callCount = 0;
+// The `from` mock returns the single-query chain by default.
+// Tests that need the list chain override mockFrom directly in their beforeEach.
 const mockFrom = vi.fn(() => {
-  callCount++;
-  // For simplicity, always return the single-query chain.
-  // Tests that need the list chain will override mockFrom directly.
   return { select: mockSelectSingle };
 });
 
@@ -51,7 +47,6 @@ async function getFetch() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  callCount = 0;
   mockMaybeSingle.mockResolvedValue({ data: null, error: null });
   mockOrder2.mockReturnValue({ data: [], error: null });
   mockOrder1.mockReturnValue({ order: mockOrder2 });
