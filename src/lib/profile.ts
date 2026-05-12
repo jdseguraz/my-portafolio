@@ -13,4 +13,12 @@ export const profile = {
   // twitterUrl: 'https://twitter.com/...' — add when needed
 } as const;
 
+/**
+ * Canonical site URL — single source of truth for sitemap, robots, and metadataBase.
+ * FR-182, NFR-42
+ * Resolves from NEXT_PUBLIC_SITE_URL env var; falls back to production URL.
+ * Never throws on unset env var.
+ */
+export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://jdseguraz.com';
+
 export type Profile = typeof profile;
