@@ -1,8 +1,18 @@
+@import "highlight.js/styles/github.css";
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Tailwind v4: dark mode via class strategy (compatible with next-themes attribute="class") */
+@custom-variant dark (&:is(.dark *));
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -12,15 +22,27 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/* Dark-mode override for highlight.js tokens (ADR-56).
+   Avoids @import-inside-selector CSS spec limitation;
+   cascade selects dark values via .dark scope. */
+.dark .hljs            { background: #0d1117; color: #c9d1d9; }
+.dark .hljs-keyword    { color: #ff7b72; }
+.dark .hljs-string     { color: #a5d6ff; }
+.dark .hljs-comment    { color: #8b949e; }
+.dark .hljs-number     { color: #79c0ff; }
+.dark .hljs-function   { color: #d2a8ff; }
+.dark .hljs-title      { color: #d2a8ff; }
+.dark .hljs-attr       { color: #79c0ff; }
+.dark .hljs-tag        { color: #7ee787; }
+.dark .hljs-built_in   { color: #ffa657; }
+.dark .hljs-variable   { color: #ffa657; }
+.dark .hljs-literal    { color: #79c0ff; }
+.dark .hljs-name       { color: #7ee787; }
+.dark .hljs-meta       { color: #8b949e; }
+.dark .hljs-symbol     { color: #79c0ff; }
