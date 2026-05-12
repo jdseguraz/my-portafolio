@@ -12,7 +12,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { uploadCover } from '@/app/admin/projects/upload-actions';
+import { uploadCover } from '@/app/(admin)/admin/projects/upload-actions';
 import { ALLOWED_MIME_TYPES, validateFile } from '@/lib/storage/upload';
 
 type Props = {

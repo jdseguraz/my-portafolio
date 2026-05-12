@@ -29,7 +29,7 @@ import {
   horizontalListSortingStrategy,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { uploadGalleryFile, deleteGalleryFile, reorderGallery } from '@/app/admin/projects/upload-actions';
+import { uploadGalleryFile, deleteGalleryFile, reorderGallery } from '@/app/(admin)/admin/projects/upload-actions';
 import { ALLOWED_MIME_TYPES, validateFile } from '@/lib/storage/upload';
 import SortableGalleryItem from './SortableGalleryItem';
 

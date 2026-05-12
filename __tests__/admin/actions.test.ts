@@ -155,7 +155,7 @@ beforeEach(() => {
 // Dynamic import inside each describe to pick up mocks correctly
 async function getActions() {
   vi.resetModules();
-  return await import('../../src/app/admin/projects/actions');
+  return await import('../../src/app/(admin)/admin/projects/actions');
 }
 
 // ---------------------------------------------------------------------------

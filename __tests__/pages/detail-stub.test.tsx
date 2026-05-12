@@ -80,7 +80,7 @@ vi.mock('../../src/lib/i18n/fallback', () => ({
 // ---------------------------------------------------------------------------
 async function getPage() {
   vi.resetModules();
-  return await import('../../src/app/[locale]/projects/[slug]/page');
+  return await import('../../src/app/(public)/[locale]/projects/[slug]/page');
 }
 
 // ---------------------------------------------------------------------------

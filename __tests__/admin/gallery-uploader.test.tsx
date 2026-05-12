@@ -17,7 +17,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 const mockUploadGalleryFile = vi.fn();
 const mockDeleteGalleryFile = vi.fn();
 
-vi.mock('@/app/admin/projects/upload-actions', () => ({
+vi.mock('@/app/(admin)/admin/projects/upload-actions', () => ({
   uploadGalleryFile: mockUploadGalleryFile,
   deleteGalleryFile: mockDeleteGalleryFile,
 }));

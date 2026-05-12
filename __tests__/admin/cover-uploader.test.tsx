@@ -15,7 +15,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 // ---------------------------------------------------------------------------
 const mockUploadCover = vi.fn();
 
-vi.mock('@/app/admin/projects/upload-actions', () => ({
+vi.mock('@/app/(admin)/admin/projects/upload-actions', () => ({
   uploadCover: mockUploadCover,
 }));
 

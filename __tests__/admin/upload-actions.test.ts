@@ -146,7 +146,7 @@ function setupHappyMocks({
 
 async function getActions() {
   vi.resetModules();
-  return await import('../../src/app/admin/projects/upload-actions');
+  return await import('../../src/app/(admin)/admin/projects/upload-actions');
 }
 
 // ---------------------------------------------------------------------------

@@ -28,7 +28,7 @@ const mockUploadGalleryFile = vi.fn();
 const mockDeleteGalleryFile = vi.fn();
 const mockReorderGallery = vi.fn();
 
-vi.mock('@/app/admin/projects/upload-actions', () => ({
+vi.mock('@/app/(admin)/admin/projects/upload-actions', () => ({
   uploadGalleryFile: mockUploadGalleryFile,
   deleteGalleryFile: mockDeleteGalleryFile,
   reorderGallery: mockReorderGallery,
