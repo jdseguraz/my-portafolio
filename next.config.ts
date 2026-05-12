@@ -11,6 +11,17 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  // FR-125, ADR-45: Allow Next.js <Image> to serve Supabase Storage URLs.
+  // Pathname scoped to public-bucket path only — private/signed routes excluded.
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
 };
 
 export default withNextIntl(nextConfig);
