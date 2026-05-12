@@ -1,10 +1,12 @@
 /**
- * Tests for src/app/[locale]/projects/[slug]/page.tsx — Fase 4 expansion.
+ * Tests for src/app/(public)/[locale]/projects/[slug]/page.tsx — Fase 4 + Fase 5.
  * FR-132–FR-164, ADR-53, ADR-54, ADR-60, ADR-61
- * Strict TDD — RED phase: page.tsx not yet rewritten.
+ * FR-180, FR-183, FR-185, ADR-69, ADR-72 — Fase 5 metadata extensions.
+ * Strict TDD.
  *
  * Strategy:
- *  - Mock @/lib/supabase/server.createClient with chainable mock (same shape as detail-stub).
+ *  - Mock @/lib/projects/fetch to provide getPublishedProjectBySlug.
+ *  - Mock @/lib/supabase/server.createClient (kept for compatibility — page no longer calls it directly).
  *  - Mock next/navigation.notFound to throw sentinel 'NEXT_NOT_FOUND'.
  *  - Mock next/image as <img> preserving src, alt, priority as data-attr.
  *  - Mock @/i18n/navigation Link as plain <a>.
@@ -158,6 +160,16 @@ vi.mock('../../src/lib/supabase/server', () => ({
 }));
 
 // ---------------------------------------------------------------------------
+// Mock: @/lib/projects/fetch — Fase 5 cached fetcher (used by page + generateMetadata)
+// ---------------------------------------------------------------------------
+const mockGetPublishedProjectBySlug = vi.fn();
+
+vi.mock('../../src/lib/projects/fetch', () => ({
+  getPublishedProjectBySlug: (slug: string) => mockGetPublishedProjectBySlug(slug),
+  getAllPublishedProjects: vi.fn().mockResolvedValue([]),
+}));
+
+// ---------------------------------------------------------------------------
 // Mock: @/lib/i18n/fallback — real logic simulation
 // ---------------------------------------------------------------------------
 vi.mock('../../src/lib/i18n/fallback', () => ({
@@ -232,8 +244,10 @@ const baseProject = {
 beforeEach(() => {
   vi.clearAllMocks();
   mockUseReducedMotion.mockReturnValue(false);
-  // Default: project found with baseProject data
+  // Default: project found with baseProject data (legacy supabase mock — kept for compat)
   mockMaybeSingle.mockResolvedValue({ data: { ...baseProject }, error: null });
+  // Default: Fase 5 cached fetcher mock
+  mockGetPublishedProjectBySlug.mockResolvedValue({ ...baseProject });
   // Default: translations via no-namespace call
   mockGetTranslations.mockResolvedValue(makeT('en'));
 });
@@ -307,10 +321,9 @@ describe('detail-page — Markdown rich render (Scenario 1 & 2)', () => {
 
 describe('detail-page — Locale fallback for description (Scenario 3 / FR-150)', () => {
   it('renders description_es content when description_en is empty and locale=en', async () => {
-    mockMaybeSingle.mockResolvedValue({
-      data: { ...baseProject, description_en: '', description_es: '## ES heading' },
-      error: null,
-    });
+    const projectData = { ...baseProject, description_en: '', description_es: '## ES heading' };
+    mockMaybeSingle.mockResolvedValue({ data: projectData, error: null });
+    mockGetPublishedProjectBySlug.mockResolvedValue(projectData);
     const { default: Page } = await getPage();
     const element = await Page({
       params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
@@ -348,10 +361,9 @@ describe('detail-page — Gallery non-empty (Scenario 4)', () => {
 
 describe('detail-page — Gallery empty array (Scenario 5)', () => {
   it('does not render gallery heading when gallery_images is empty array', async () => {
-    mockMaybeSingle.mockResolvedValue({
-      data: { ...baseProject, gallery_images: [] },
-      error: null,
-    });
+    const projectData = { ...baseProject, gallery_images: [] };
+    mockMaybeSingle.mockResolvedValue({ data: projectData, error: null });
+    mockGetPublishedProjectBySlug.mockResolvedValue(projectData);
     const { default: Page } = await getPage();
     const element = await Page({
       params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
@@ -361,10 +373,9 @@ describe('detail-page — Gallery empty array (Scenario 5)', () => {
   });
 
   it('does not render gallery images when gallery_images is empty array', async () => {
-    mockMaybeSingle.mockResolvedValue({
-      data: { ...baseProject, gallery_images: [] },
-      error: null,
-    });
+    const projectData = { ...baseProject, gallery_images: [] };
+    mockMaybeSingle.mockResolvedValue({ data: projectData, error: null });
+    mockGetPublishedProjectBySlug.mockResolvedValue(projectData);
     const { default: Page } = await getPage();
     const element = await Page({
       params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
@@ -377,10 +388,9 @@ describe('detail-page — Gallery empty array (Scenario 5)', () => {
 
 describe('detail-page — Gallery null (Scenario 6)', () => {
   it('does not render gallery heading when gallery_images is null', async () => {
-    mockMaybeSingle.mockResolvedValue({
-      data: { ...baseProject, gallery_images: null },
-      error: null,
-    });
+    const projectData = { ...baseProject, gallery_images: null };
+    mockMaybeSingle.mockResolvedValue({ data: projectData, error: null });
+    mockGetPublishedProjectBySlug.mockResolvedValue(projectData);
     const { default: Page } = await getPage();
     const element = await Page({
       params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
@@ -415,6 +425,7 @@ describe('detail-page — First image priority (Scenario 7)', () => {
 describe('detail-page — notFound on missing slug (Scenario 8)', () => {
   it('calls notFound() when project is null', async () => {
     mockMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockGetPublishedProjectBySlug.mockResolvedValue(null);
     const { default: Page } = await getPage();
     await expect(
       Page({ params: Promise.resolve({ locale: 'en', slug: 'does-not-exist' }) })
@@ -426,6 +437,7 @@ describe('detail-page — notFound on missing slug (Scenario 8)', () => {
 describe('detail-page — notFound on unpublished (Scenario 9)', () => {
   it('calls notFound() when published=false (filtered by query)', async () => {
     mockMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockGetPublishedProjectBySlug.mockResolvedValue(null);
     const { default: Page } = await getPage();
     await expect(
       Page({ params: Promise.resolve({ locale: 'en', slug: 'draft-project' }) })
@@ -436,14 +448,13 @@ describe('detail-page — notFound on unpublished (Scenario 9)', () => {
 
 describe('detail-page — XSS defense (Scenario 13 / FR-149)', () => {
   it('does not render a <script> element when description contains script tag', async () => {
-    mockMaybeSingle.mockResolvedValue({
-      data: {
-        ...baseProject,
-        description_en: "<script>alert('xss')</script> Normal text",
-        description_es: '',
-      },
-      error: null,
-    });
+    const projectData = {
+      ...baseProject,
+      description_en: "<script>alert('xss')</script> Normal text",
+      description_es: '',
+    };
+    mockMaybeSingle.mockResolvedValue({ data: projectData, error: null });
+    mockGetPublishedProjectBySlug.mockResolvedValue(projectData);
     const { default: Page } = await getPage();
     const element = await Page({
       params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
@@ -470,6 +481,7 @@ describe('detail-page — generateMetadata (Scenario 10 / ADR-60)', () => {
 
   it('returns {} for missing project', async () => {
     mockMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockGetPublishedProjectBySlug.mockResolvedValue(null);
     const { generateMetadata } = await getPage();
     const result = await generateMetadata!({
       params: Promise.resolve({ locale: 'en', slug: 'does-not-exist' }),
@@ -479,14 +491,9 @@ describe('detail-page — generateMetadata (Scenario 10 / ADR-60)', () => {
 
   it('truncates description to exactly 160 chars for long subtitles', async () => {
     const longSubtitle = 'A'.repeat(200);
-    mockMaybeSingle.mockResolvedValue({
-      data: {
-        ...baseProject,
-        subtitle_en: longSubtitle,
-        subtitle_es: '',
-      },
-      error: null,
-    });
+    const projectData = { ...baseProject, subtitle_en: longSubtitle, subtitle_es: '' };
+    mockMaybeSingle.mockResolvedValue({ data: projectData, error: null });
+    mockGetPublishedProjectBySlug.mockResolvedValue(projectData);
     const { generateMetadata } = await getPage();
     const result = await generateMetadata!({
       params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
@@ -500,5 +507,63 @@ describe('detail-page — generateMetadata (Scenario 10 / ADR-60)', () => {
       params: Promise.resolve({ locale: 'es', slug: 'test-project' }),
     });
     expect((result as { title?: string }).title).toMatch(/^Mi Proyecto/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Fase 5 metadata extensions (task 5.24, ADR-69, FR-180)
+// ---------------------------------------------------------------------------
+describe('detail-page — generateMetadata Fase 5 — alternates', () => {
+  it('returns alternates.canonical = /en/projects/test-project', async () => {
+    const { generateMetadata } = await getPage();
+    const result = await generateMetadata!({
+      params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
+    }) as { alternates?: { canonical?: string; languages?: Record<string, string> } };
+    expect(result.alternates?.canonical).toBe('/en/projects/test-project');
+  });
+
+  it('returns alternates.languages.es = /es/projects/test-project', async () => {
+    const { generateMetadata } = await getPage();
+    const result = await generateMetadata!({
+      params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
+    }) as { alternates?: { canonical?: string; languages?: Record<string, string> } };
+    expect(result.alternates?.languages?.['es']).toBe('/es/projects/test-project');
+  });
+
+  it('returns alternates.languages.x-default = /es/projects/test-project', async () => {
+    const { generateMetadata } = await getPage();
+    const result = await generateMetadata!({
+      params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
+    }) as { alternates?: { canonical?: string; languages?: Record<string, string> } };
+    expect(result.alternates?.languages?.['x-default']).toBe('/es/projects/test-project');
+  });
+});
+
+describe('detail-page — generateMetadata Fase 5 — openGraph', () => {
+  it('openGraph.images[0].url = project.cover_image_url', async () => {
+    const { generateMetadata } = await getPage();
+    const result = await generateMetadata!({
+      params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
+    }) as { openGraph?: { images?: Array<{ url: string }> | string[]; type?: string } };
+    const images = result.openGraph?.images as Array<{ url: string }> | undefined;
+    expect(images?.[0]?.url).toBe('https://example.com/cover.jpg');
+  });
+
+  it('openGraph.type = article', async () => {
+    const { generateMetadata } = await getPage();
+    const result = await generateMetadata!({
+      params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
+    }) as { openGraph?: { type?: string } };
+    expect(result.openGraph?.type).toBe('article');
+  });
+});
+
+describe('detail-page — generateMetadata Fase 5 — twitter', () => {
+  it('twitter.card = summary_large_image', async () => {
+    const { generateMetadata } = await getPage();
+    const result = await generateMetadata!({
+      params: Promise.resolve({ locale: 'en', slug: 'test-project' }),
+    }) as { twitter?: { card?: string } };
+    expect(result.twitter?.card).toBe('summary_large_image');
   });
 });
