@@ -191,10 +191,13 @@ async function getPage() {
 // ---------------------------------------------------------------------------
 function makeT(locale: string = 'en') {
   const map: Record<string, string> = {
+    // No-namespace dot notation
     'nav.backToGallery': locale === 'es' ? 'Volver a la galería' : 'Back to gallery',
     'gallery.heading': locale === 'es' ? 'Galería del proyecto' : 'Project gallery',
-    // Legacy (if page calls with namespace 'nav')
+    // Namespaced calls: getTranslations('nav') → t('backToGallery')
     'backToGallery': locale === 'es' ? 'Volver a la galería' : 'Back to gallery',
+    // Namespaced calls: getTranslations('gallery') → t('heading')
+    'heading': locale === 'es' ? 'Galería del proyecto' : 'Project gallery',
   };
   return (key: string) => map[key] ?? key;
 }
@@ -447,7 +450,8 @@ describe('detail-page — XSS defense (Scenario 13 / FR-149)', () => {
     });
     render(element as React.ReactElement);
     expect(document.querySelector('script')).toBeFalsy();
-    expect(screen.getByText('Normal text')).toBeInTheDocument();
+    // 'Normal text' may be part of a larger text node — use regex matcher
+    expect(screen.getByText(/Normal text/)).toBeInTheDocument();
   });
 });
 
