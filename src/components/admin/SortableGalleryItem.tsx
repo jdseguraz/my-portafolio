@@ -18,9 +18,11 @@ type Props = {
   id: string;
   url: string;
   onDelete: () => void;
+  /** Disables the delete button (e.g. while a delete is in-flight). */
+  disabled?: boolean;
 };
 
-export default function SortableGalleryItem({ id, url, onDelete }: Props) {
+export default function SortableGalleryItem({ id, url, onDelete, disabled }: Props) {
   const {
     attributes,
     listeners,
@@ -67,7 +69,8 @@ export default function SortableGalleryItem({ id, url, onDelete }: Props) {
         type="button"
         aria-label={`Delete ${url}`}
         onClick={onDelete}
-        className="absolute top-1 right-1 rounded-full bg-black/60 text-white w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+        disabled={disabled}
+        className="absolute top-1 right-1 rounded-full bg-black/60 text-white w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-30"
       >
         ×
       </button>

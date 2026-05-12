@@ -179,6 +179,7 @@ export default function GalleryUploader({ projectId, value, onChange, onReorder 
                   id={url}
                   url={url}
                   onDelete={() => handleDelete(url)}
+                  disabled={deletingUrl === url || uploading}
                 />
               ))}
             </div>
