@@ -153,8 +153,7 @@ const defaultProps = {
   ],
   backLinkLabel: 'Back to gallery',
   galleryHeading: 'Project gallery',
-  locale: 'en',
-  slug: 'my-project',
+  // locale and slug removed — W-01 resolution (ADR-75, FR-191)
 };
 
 beforeEach(() => {

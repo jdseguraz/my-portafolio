@@ -5,6 +5,10 @@ import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 
+/**
+ * W-01 resolution (ADR-75): locale and slug props removed — they were accepted but unused.
+ * FR-191.
+ */
 interface ProjectDetailMotionProps {
   title: string;
   subtitle: string;
@@ -13,8 +17,6 @@ interface ProjectDetailMotionProps {
   galleryUrls: string[];
   backLinkLabel: string;
   galleryHeading: string;
-  locale: string;
-  slug: string;
 }
 
 export default function ProjectDetailMotion({
