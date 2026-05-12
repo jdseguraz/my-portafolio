@@ -41,11 +41,11 @@ vi.mock('motion/react', () => ({
 }));
 
 // ---------------------------------------------------------------------------
-// Mock lucide-react icons
+// Mock lucide-react icons (v1 removed Github/Linkedin branded icons; using ExternalLink + Globe)
 // ---------------------------------------------------------------------------
 vi.mock('lucide-react', () => ({
-  Github: ({ 'aria-label': label }: { 'aria-label'?: string }) => <svg aria-label={label} data-testid="icon-github" />,
-  Linkedin: ({ 'aria-label': label }: { 'aria-label'?: string }) => <svg aria-label={label} data-testid="icon-linkedin" />,
+  ExternalLink: ({ 'aria-label': label }: { 'aria-label'?: string }) => <svg aria-label={label} data-testid="icon-github" />,
+  Globe: ({ 'aria-label': label }: { 'aria-label'?: string }) => <svg aria-label={label} data-testid="icon-linkedin" />,
   Mail: ({ 'aria-label': label }: { 'aria-label'?: string }) => <svg aria-label={label} data-testid="icon-mail" />,
 }));
 
