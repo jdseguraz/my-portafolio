@@ -48,14 +48,16 @@ export default function ProjectCardMotion({
     >
       <Link href={`/projects/${slug}`}>
         {coverUrl && (
-          <div className="aspect-[4/3] relative overflow-hidden rounded-lg mb-3">
+          <div className="overflow-hidden rounded-lg mb-3">
             <Image
               src={coverUrl}
               alt={localizedTitle}
-              fill
+              width={1200}
+              height={800}
               priority={isPriority}
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              style={{ width: '100%', height: 'auto' }}
+              className="block transition-transform duration-300 group-hover:scale-[1.02]"
             />
           </div>
         )}
