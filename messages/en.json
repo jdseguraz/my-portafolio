@@ -5,7 +5,8 @@
     "tagline": "Building thoughtful digital products."
   },
   "gallery": {
-    "empty": "No projects yet — check back soon."
+    "empty": "No projects yet — check back soon.",
+    "heading": "Project gallery"
   },
   "meta": {
     "title": "Juan Segura — Developer Portfolio",

@@ -5,7 +5,8 @@
     "tagline": "Construyendo cosas en la web."
   },
   "gallery": {
-    "empty": "Sin proyectos por ahora — volvé pronto."
+    "empty": "Sin proyectos por ahora — volvé pronto.",
+    "heading": "Galería del proyecto"
   },
   "meta": {
     "title": "Juan Segura — Portafolio de Developer",
