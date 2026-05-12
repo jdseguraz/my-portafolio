@@ -233,13 +233,14 @@ export async function updateProject(id: string, formData: FormData): Promise<Act
   // ADR-19: Server-side authoritative slug cleanse
   const slug = slugify(rawSlug || title_en || title_es);
 
-  // ADR-20: Validate required fields if publishing
+  // ADR-20 + FR-95: Validate required fields if publishing (cover_image_url included for clarity)
   if (published) {
     const validation = validateForPublish({
       title_en, title_es,
       subtitle_en, subtitle_es,
       description_en, description_es,
       slug,
+      cover_image_url,
     });
     if (!validation.ok) {
       return { ok: false, errors: validation.errors };

@@ -263,6 +263,17 @@ describe('updateProject', () => {
     expect(mockUpdate).toHaveBeenCalled();
     expect(mockEqChain).toHaveBeenCalledWith('id', 'target-id');
   });
+
+  it('rejects publish when cover_image_url is empty (defense-in-depth)', async () => {
+    const { updateProject } = await getActions();
+    const result = await updateProject('target-id', makeFormData(validPublishPayload));
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.cover_image_url).toBeTruthy();
+    }
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
 });
 
 describe('deleteProject', () => {
