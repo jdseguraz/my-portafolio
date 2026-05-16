@@ -36,6 +36,42 @@ vi.mock('motion/react', () => ({
         {children}
       </div>
     )),
+    // Per-letter title animation introduced after the original test was
+    // written. Render as plain <h1>/<span> without leaking motion-specific
+    // props onto the DOM so the surrounding assertions about motion.div
+    // initial/animate props keep targeting the tagline + social wrappers.
+    h1: ({
+      children,
+      initial: _i,
+      animate: _a,
+      variants: _v,
+      transition: _t,
+      ...rest
+    }: {
+      children?: React.ReactNode;
+      initial?: unknown;
+      animate?: unknown;
+      variants?: unknown;
+      transition?: unknown;
+      [key: string]: unknown;
+    }) => <h1 {...rest}>{children}</h1>,
+    span: ({
+      children,
+      initial: _i,
+      animate: _a,
+      variants: _v,
+      transition: _t,
+      style,
+      ...rest
+    }: {
+      children?: React.ReactNode;
+      initial?: unknown;
+      animate?: unknown;
+      variants?: unknown;
+      transition?: unknown;
+      style?: React.CSSProperties;
+      [key: string]: unknown;
+    }) => <span style={style} {...rest}>{children}</span>,
   },
   useReducedMotion: () => mockUseReducedMotion(),
 }));
@@ -88,7 +124,10 @@ describe('HeroMotion — normal motion (useReducedMotion = false)', () => {
   it('renders title text', async () => {
     const { default: HeroMotion } = await getComponent();
     render(<HeroMotion {...defaultProps} />);
-    expect(screen.getByText('Test Title')).toBeInTheDocument();
+    // Title is now split into per-letter motion spans for cascade animation;
+    // assert via the accessible heading role (aria-label preserves the full
+    // string for screen readers).
+    expect(screen.getByRole('heading', { name: 'Test Title' })).toBeInTheDocument();
   });
 
   it('renders tagline text', async () => {
@@ -137,7 +176,7 @@ describe('HeroMotion — reduced motion (useReducedMotion = true)', () => {
   it('still renders title text when reduced motion is active', async () => {
     const { default: HeroMotion } = await getComponent();
     render(<HeroMotion {...defaultProps} />);
-    expect(screen.getByText('Test Title')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Test Title' })).toBeInTheDocument();
   });
 
   it('still renders tagline text when reduced motion is active', async () => {

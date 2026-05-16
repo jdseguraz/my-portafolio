@@ -14,6 +14,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import PublicHeader from '@/components/PublicHeader';
 import ThemeProvider from '@/components/theme-provider';
+import BackgroundAmbient from '@/components/BackgroundAmbient';
 import type { ReactNode } from 'react';
 import '../../globals.css';
 
@@ -59,6 +60,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       </head>
       <body className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <BackgroundAmbient />
           <NextIntlClientProvider messages={messages}>
             <PublicHeader />
             <main>{children}</main>

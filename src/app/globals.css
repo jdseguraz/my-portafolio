@@ -64,6 +64,10 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* Scope negative-z descendants (e.g. BackgroundAmbient) to body's
+     stacking context — keeps them above body's own bg paint but
+     below static content like the header and main. */
+  isolation: isolate;
 }
 
 /* Dark-mode override for highlight.js tokens (ADR-56).
