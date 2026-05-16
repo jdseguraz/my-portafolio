@@ -51,6 +51,8 @@ export async function uploadCover(
   await requireAdminSession(); // FR-81: FIRST
 
   const file = formData.get('file') as File | null;
+  console.log('[uploadCover] projectId=%s file=%o', projectId,
+    file ? { name: file.name, size: file.size, type: file.type } : null);
   if (!file || file.size === 0) {
     return { ok: false, errors: { file: 'No file provided' } };
   }
@@ -62,8 +64,10 @@ export async function uploadCover(
   let url: string;
   try {
     url = await doCoverUpload(supabaseForStorage, projectId, file);
+    console.log('[uploadCover] doCoverUpload returned url=%s', url);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Upload failed';
+    console.error('[uploadCover] doCoverUpload threw:', msg);
     if (msg === 'File too large') {
       return { ok: false, errors: { file: 'File too large' } };
     }
@@ -80,9 +84,11 @@ export async function uploadCover(
     .eq('id', projectId);
 
   if (dbError) {
+    console.error('[uploadCover] DB update failed:', dbError.message);
     return { ok: false, errors: { _form: dbError.message } };
   }
 
+  console.log('[uploadCover] success — DB updated with %s', url);
   revalidatePath('/admin/projects');
   return { ok: true, data: { url } };
 }
@@ -103,6 +109,8 @@ export async function uploadGalleryFile(
   await requireAdminSession(); // FR-81: FIRST
 
   const file = formData.get('file') as File | null;
+  console.log('[uploadGalleryFile] projectId=%s file=%o', projectId,
+    file ? { name: file.name, size: file.size, type: file.type } : null);
   if (!file || file.size === 0) {
     return { ok: false, errors: { file: 'No file provided' } };
   }
@@ -113,8 +121,10 @@ export async function uploadGalleryFile(
   let url: string;
   try {
     url = await doGalleryUpload(supabaseForStorage, projectId, file);
+    console.log('[uploadGalleryFile] doGalleryUpload returned url=%s', url);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Upload failed';
+    console.error('[uploadGalleryFile] doGalleryUpload threw:', msg);
     if (msg === 'File too large') {
       return { ok: false, errors: { file: 'File too large' } };
     }

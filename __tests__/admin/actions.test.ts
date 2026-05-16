@@ -40,7 +40,18 @@ vi.mock('next/cache', () => ({
 // We expose the inner spy functions so tests can assert on them.
 // Now includes storage chain for PR2 Storage cleanup tests.
 // ---------------------------------------------------------------------------
-const mockInsert = vi.fn().mockResolvedValue({ data: [{ id: 'new-uuid' }], error: null });
+// createProject now chains .insert(...).select('id').single() — so mockInsert
+// must return a thenable chain object, not a Promise. Configure via setInsertResult.
+const mockInsert = vi.fn();
+function setInsertResult(opts: { data?: unknown; error?: unknown; onCall?: () => void } = {}) {
+  const { data = { id: 'new-uuid' }, error = null, onCall } = opts;
+  const single = vi.fn().mockImplementation(async () => {
+    onCall?.();
+    return { data, error };
+  });
+  const select = vi.fn().mockReturnValue({ single });
+  mockInsert.mockReturnValue({ select });
+}
 const mockUpdate = vi.fn().mockResolvedValue({ data: null, error: null });
 const mockDelete = vi.fn().mockResolvedValue({ data: null, error: null });
 const mockEq = vi.fn();
@@ -125,7 +136,7 @@ beforeEach(() => {
   // Re-establish default implementations after clearAllMocks
   (requireAdminSession as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
-  mockInsert.mockResolvedValue({ data: [{ id: 'new-uuid' }], error: null });
+  setInsertResult();
   mockUpdate.mockReturnValue({ eq: mockEq });
   mockDelete.mockReturnValue({ eq: mockEq });
   mockEq.mockResolvedValue({ data: null, error: null });
@@ -231,7 +242,7 @@ describe('createProject', () => {
   });
 
   it('maps Postgres 23505 unique violation to user-visible slug error', async () => {
-    mockInsert.mockResolvedValue({
+    setInsertResult({
       data: null,
       error: { code: '23505', message: 'duplicate key value violates unique constraint' },
     });
@@ -446,10 +457,10 @@ describe('createProject — with file upload sequencing (PR2)', () => {
   it('create with cover file: insert → upload cover → UPDATE cover_image_url in order', async () => {
     const callOrder: string[] = [];
 
-    // Mock insert to return new id
-    mockInsert.mockImplementation(async () => {
-      callOrder.push('insert');
-      return { data: [{ id: 'new-uuid' }], error: null };
+    // Mock insert to return new id; record the call order at .single() resolution
+    setInsertResult({
+      data: { id: 'new-uuid' },
+      onCall: () => callOrder.push('insert'),
     });
 
     // Mock storage upload for cover
@@ -505,7 +516,7 @@ describe('createProject — with file upload sequencing (PR2)', () => {
 
   it('upload fails after insert: from("projects").delete().eq("id", newId) called for rollback', async () => {
     // insert succeeds
-    mockInsert.mockResolvedValue({ data: [{ id: 'orphan-id' }], error: null });
+    setInsertResult({ data: { id: 'orphan-id' } });
 
     // storage upload fails
     mockStorageUpload.mockResolvedValue({ data: null, error: { message: 'Upload failed' } });

@@ -6,10 +6,10 @@
  */
 
 export const profile = {
-  name: 'Juan Segura',
-  email: 'juan.segura@brickelltravel.com',
-  githubUrl: 'https://github.com/juanseguravasco',
-  linkedinUrl: 'https://www.linkedin.com/in/juanseguravasco',
+  name: 'David Segura',
+  email: 'jdsegurazabala@gmail.com',
+  githubUrl: 'https://github.com/jdseguraz',
+  linkedinUrl: 'https://www.linkedin.com/in/david-segura-zabala/',
   // twitterUrl: 'https://twitter.com/...' — add when needed
 } as const;
 

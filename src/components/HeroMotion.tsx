@@ -51,43 +51,50 @@ export default function HeroMotion({
   }
 
   return (
-    <section className="flex flex-col items-center justify-center text-center py-24 px-6 gap-6">
-      {/* Group 1: Title */}
+    <section className="flex flex-col items-center justify-center text-center pt-16 pb-20 sm:pt-24 sm:pb-28 px-6 gap-8">
+      {/* Group 1: Monumental wordmark — fluid type scales with viewport */}
       <motion.div {...makeVariants(0)}>
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{title}</h1>
+        <h1
+          className="font-bold uppercase leading-[0.85] tracking-[-0.04em] text-balance"
+          style={{ fontSize: 'clamp(3rem, 14vw, 11rem)' }}
+        >
+          {title}
+        </h1>
       </motion.div>
 
       {/* Group 2: Tagline */}
-      <motion.div {...makeVariants(0.1)}>
-        <p className="text-xl text-foreground/70 max-w-prose">{tagline}</p>
+      <motion.div {...makeVariants(0.15)}>
+        <p className="text-base sm:text-lg text-foreground/60 max-w-xl text-balance">
+          {tagline}
+        </p>
       </motion.div>
 
-      {/* Group 3: Social links */}
-      <motion.div {...makeVariants(0.2)} className="flex items-center gap-6">
+      {/* Group 3: Social links — small + subtle */}
+      <motion.div {...makeVariants(0.3)} className="flex items-center gap-5 mt-2">
         <a
           href={githubUrl}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="GitHub"
-          className="opacity-70 hover:opacity-100 transition-opacity"
+          className="opacity-60 hover:opacity-100 transition-opacity"
         >
-          <GitHubIcon size={24} ariaLabel="GitHub" />
+          <GitHubIcon size={20} ariaLabel="GitHub" />
         </a>
         <a
           href={linkedinUrl}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="LinkedIn"
-          className="opacity-70 hover:opacity-100 transition-opacity"
+          className="opacity-60 hover:opacity-100 transition-opacity"
         >
-          <LinkedInIcon size={24} ariaLabel="LinkedIn" />
+          <LinkedInIcon size={20} ariaLabel="LinkedIn" />
         </a>
         <a
           href={`mailto:${email}`}
           aria-label="Email"
-          className="opacity-70 hover:opacity-100 transition-opacity"
+          className="opacity-60 hover:opacity-100 transition-opacity"
         >
-          <Mail size={24} aria-label="Email" />
+          <Mail size={20} strokeWidth={1.75} aria-label="Email" />
         </a>
       </motion.div>
     </section>

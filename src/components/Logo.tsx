@@ -16,9 +16,9 @@ export default function Logo({ ariaLabel }: LogoProps) {
     <Link
       href="/"
       aria-label={ariaLabel}
-      className="text-lg font-bold tracking-tight hover:opacity-80 transition-opacity"
+      className="text-base font-semibold tracking-tight hover:opacity-70 transition-opacity"
     >
-      JS
+      David Segura
     </Link>
   );
 }

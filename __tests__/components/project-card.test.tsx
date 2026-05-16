@@ -134,12 +134,12 @@ describe('ProjectCard — locale=en', () => {
     expect(img).toHaveAttribute('alt', 'My Project EN');
   });
 
-  it('renders each tag as a chip', async () => {
+  it('renders all tags as a comma-separated caption', async () => {
     const { default: ProjectCard } = await getProjectCard();
     const element = await ProjectCard({ project: mockProject, locale: 'en' });
     render(element as React.ReactElement);
-    expect(screen.getByText('React')).toBeInTheDocument();
-    expect(screen.getByText('TypeScript')).toBeInTheDocument();
+    // Dann Petty-style caption: tags joined with commas in a single dim text node
+    expect(screen.getByText(/React.*TypeScript/)).toBeInTheDocument();
   });
 });
 
