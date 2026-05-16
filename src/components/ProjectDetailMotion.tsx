@@ -3,7 +3,9 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
+import { ExternalLink } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import GitHubIcon from '@/components/icons/GitHubIcon';
 
 /**
  * W-01 resolution (ADR-75): locale and slug props removed — they were accepted but unused.
@@ -17,6 +19,10 @@ interface ProjectDetailMotionProps {
   galleryUrls: string[];
   backLinkLabel: string;
   galleryHeading: string;
+  liveUrl?: string | null;
+  liveLinkLabel?: string;
+  repoUrl?: string | null;
+  repoLinkLabel?: string;
 }
 
 export default function ProjectDetailMotion({
@@ -27,6 +33,10 @@ export default function ProjectDetailMotion({
   galleryUrls,
   backLinkLabel,
   galleryHeading,
+  liveUrl,
+  liveLinkLabel,
+  repoUrl,
+  repoLinkLabel,
 }: ProjectDetailMotionProps) {
   const shouldReduce = useReducedMotion();
 
@@ -60,8 +70,8 @@ export default function ProjectDetailMotion({
       };
 
   return (
-    <article className="px-6 py-12 max-w-3xl mx-auto">
-      <motion.section {...makeAnimate(0)} className="mb-12">
+    <article className="px-4 sm:px-6 py-8 sm:py-12 max-w-3xl mx-auto">
+      <motion.section {...makeAnimate(0)} className="mb-8 sm:mb-12">
         <Link
           href="/"
           className="text-sm opacity-70 hover:opacity-100 underline"
@@ -69,8 +79,10 @@ export default function ProjectDetailMotion({
         >
           ← {backLinkLabel}
         </Link>
-        <h1 className="text-4xl font-bold mt-6">{title}</h1>
-        {subtitle && <p className="opacity-70 mt-2">{subtitle}</p>}
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-6 text-balance leading-[1.1]">
+          {title}
+        </h1>
+        {subtitle && <p className="opacity-70 mt-2 text-balance">{subtitle}</p>}
         {tags && tags.length > 0 && (
           <div className="flex gap-2 flex-wrap mt-4">
             {tags.map((tag) => (
@@ -83,16 +95,42 @@ export default function ProjectDetailMotion({
             ))}
           </div>
         )}
+        {(liveUrl || repoUrl) && (
+          <div className="flex flex-wrap items-center gap-3 mt-6">
+            {liveUrl && liveLinkLabel && (
+              <a
+                href={liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                {liveLinkLabel}
+                <ExternalLink size={14} strokeWidth={2} aria-hidden="true" />
+              </a>
+            )}
+            {repoUrl && repoLinkLabel && (
+              <a
+                href={repoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-foreground/20 text-sm font-medium hover:bg-foreground/5 transition-colors"
+              >
+                <GitHubIcon size={16} ariaLabel={repoLinkLabel} />
+                {repoLinkLabel}
+              </a>
+            )}
+          </div>
+        )}
       </motion.section>
 
-      <motion.section {...makeAnimate(0.1)} className="mb-16">
+      <motion.section {...makeAnimate(0.1)} className="mb-10 sm:mb-16">
         {descriptionNode}
       </motion.section>
 
       {normalizedGalleryUrls.length > 0 && (
-        <motion.section {...galleryVariants} className="mt-12">
-          <h2 className="text-2xl font-semibold mb-6">{galleryHeading}</h2>
-          <div className="space-y-6">
+        <motion.section {...galleryVariants} className="mt-8 sm:mt-12">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">{galleryHeading}</h2>
+          <div className="space-y-4 sm:space-y-6">
             {normalizedGalleryUrls.map((url, i) => (
               <Image
                 key={url}

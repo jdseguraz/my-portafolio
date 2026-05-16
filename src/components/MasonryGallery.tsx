@@ -6,6 +6,7 @@
  * No 'use client' — this is a Server Component.
  * Returns null when projects is empty (caller renders EmptyState instead).
  */
+import { getTranslations } from 'next-intl/server';
 import { distributeToColumns } from '@/lib/gallery/distribute-columns';
 import type { Database } from '@/lib/supabase/database.types';
 import MasonryGalleryAnimated from './MasonryGalleryAnimated';
@@ -29,11 +30,17 @@ export default async function MasonryGallery({ projects, locale }: MasonryGaller
   // The first card in the desktop 3-column first column gets priority loading
   const priorityProjectId = three[0]?.[0]?.id;
 
+  const t = await getTranslations('gallery');
+  const liveLinkLabel = t('liveLink');
+  const repoLinkLabel = t('repoLink');
+
   return (
     <MasonryGalleryAnimated
       columns={{ one, two, three }}
       locale={locale}
       priorityProjectId={priorityProjectId}
+      liveLinkLabel={liveLinkLabel}
+      repoLinkLabel={repoLinkLabel}
     />
   );
 }

@@ -2,6 +2,44 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Belt-and-suspenders responsive layout for the masonry gallery.
+   Pure CSS media queries — independent of Tailwind JIT compilation,
+   which has been observed to miss arbitrary-value breakpoint classes
+   in this codebase (see [[portfolio/grid-breakpoints]]). */
+@media (max-width: 639px) {
+  [data-testid="layout-2col"],
+  [data-testid="layout-3col"] {
+    display: none;
+  }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  [data-testid="layout-1col"],
+  [data-testid="layout-3col"] {
+    display: none;
+  }
+  [data-testid="layout-2col"] {
+    display: flex;
+  }
+}
+@media (min-width: 1024px) {
+  [data-testid="layout-1col"],
+  [data-testid="layout-2col"] {
+    display: none;
+  }
+  [data-testid="layout-3col"] {
+    display: flex;
+  }
+}
+
+/* Flexbox min-content override: without this, flex children inherit a
+   min-width of `auto` based on their min-content size, which for cards
+   containing 1200px-wide cover images expands the column past its
+   fair-share, causing asymmetric widths and right-side overflow. */
+[data-testid="layout-2col"] > [data-testid^="col-2-"],
+[data-testid="layout-3col"] > [data-testid^="col-3-"] {
+  min-width: 0;
+}
+
 /* Tailwind v4: dark mode via class strategy (compatible with next-themes attribute="class") */
 @custom-variant dark (&:is(.dark *));
 

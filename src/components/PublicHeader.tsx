@@ -15,9 +15,9 @@ export default async function PublicHeader() {
   const t = await getTranslations('header');
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 border-b border-foreground/10">
+    <header className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-foreground/10">
       <Logo ariaLabel={t('logoAlt')} />
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <LocaleSwitcher />
         <ThemeToggle />
       </div>

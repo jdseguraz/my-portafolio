@@ -11,9 +11,10 @@
  * any Server Action signature changes and keeps FormData as the wire format.
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useActionState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import MarkdownEditor from './MarkdownEditor';
 import TagsEditor from './TagsEditor';
 import PublishToggle from './PublishToggle';
@@ -39,6 +40,8 @@ type FormState = {
   cover_image_url: string;
   gallery_images: string[];
   published: boolean;
+  live_url: string;
+  repo_url: string;
 };
 
 type ActionResult =
@@ -71,6 +74,8 @@ function defaultState(initial?: Partial<ProjectRow> | null): FormState {
     cover_image_url: initial?.cover_image_url ?? '',
     gallery_images: initial?.gallery_images ?? [],
     published: initial?.published ?? false,
+    live_url: initial?.live_url ?? '',
+    repo_url: initial?.repo_url ?? '',
   };
 }
 
@@ -95,6 +100,8 @@ export default function ProjectForm({ initial, action, mode, projectId = null }:
     nativeFormData.set('cover_image_url', state.cover_image_url);
     nativeFormData.set('gallery_images', JSON.stringify(state.gallery_images));
     nativeFormData.set('published', String(state.published));
+    nativeFormData.set('live_url', state.live_url);
+    nativeFormData.set('repo_url', state.repo_url);
     // Native multi-file <input name="gallery"> entries remain intact via FormData.getAll('gallery').
     // Native <input name="cover"> file remains intact via FormData.get('cover').
     return await action(nativeFormData);
@@ -104,6 +111,16 @@ export default function ProjectForm({ initial, action, mode, projectId = null }:
     handleAction,
     null,
   );
+
+  // After a successful create, navigate to the new project's edit page so the
+  // user sees the persisted state (uploaded cover/gallery URLs, real DB id)
+  // instead of being stranded on /new with stale blob previews.
+  const router = useRouter();
+  useEffect(() => {
+    if (mode === 'create' && result?.ok && result.data?.id) {
+      router.push(`/admin/projects/${result.data.id}/edit`);
+    }
+  }, [mode, result, router]);
 
   function handleTitleEnBlur() {
     if (!slugTouched.current && state.en.title) {
@@ -257,6 +274,34 @@ export default function ProjectForm({ initial, action, mode, projectId = null }:
             className="input-base w-24"
             min={0}
           />
+        </Field>
+
+        <Field label="Live URL (optional)" error={fieldError('live_url')}>
+          <input
+            type="url"
+            value={state.live_url}
+            onChange={(e) => setState((s) => ({ ...s, live_url: e.target.value }))}
+            className="input-base"
+            placeholder="https://example.com"
+            inputMode="url"
+          />
+          <p className="text-xs opacity-50 mt-1">
+            Production URL of the real site. Shown as an external-link icon on the gallery card and a button on the project detail page. Leave empty to hide.
+          </p>
+        </Field>
+
+        <Field label="Repo URL (optional)" error={fieldError('repo_url')}>
+          <input
+            type="url"
+            value={state.repo_url}
+            onChange={(e) => setState((s) => ({ ...s, repo_url: e.target.value }))}
+            className="input-base"
+            placeholder="https://github.com/user/repo"
+            inputMode="url"
+          />
+          <p className="text-xs opacity-50 mt-1">
+            Source-code repository URL. Shown as a GitHub icon on the gallery card and a secondary &quot;View source&quot; button on the project detail page. Leave empty to hide.
+          </p>
         </Field>
 
         <Field label="Cover image" error={fieldError('cover_image_url')}>

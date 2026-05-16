@@ -14,7 +14,7 @@ import 'server-only';
 import { requireAdminSession } from '@/lib/auth/require-session';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { slugify } from '@/lib/projects/slug';
-import { validateForPublish } from '@/lib/projects/validation';
+import { normalizeHttpUrl, validateForPublish } from '@/lib/projects/validation';
 import { doCoverUpload, doGalleryUpload, BUCKET, type StorageClient } from '@/lib/storage/upload-internals';
 import { validateFile } from '@/lib/storage/upload';
 import { revalidatePath } from 'next/cache';
@@ -80,6 +80,20 @@ export async function createProject(formData: FormData): Promise<ActionResult> {
   const tags = parseTags(formData);
   const display_order = int(formData, 'display_order');
 
+  // Optional production URL — null when omitted, validated when provided.
+  const liveUrlResult = normalizeHttpUrl(str(formData, 'live_url'));
+  if (!liveUrlResult.ok) {
+    return { ok: false, errors: { live_url: liveUrlResult.error } };
+  }
+  const live_url = liveUrlResult.value;
+
+  // Optional source repository URL — same semantics as live_url.
+  const repoUrlResult = normalizeHttpUrl(str(formData, 'repo_url'));
+  if (!repoUrlResult.ok) {
+    return { ok: false, errors: { repo_url: repoUrlResult.error } };
+  }
+  const repo_url = repoUrlResult.value;
+
   // ADR-19: Server-side authoritative slug cleanse
   const slug = slugify(rawSlug || title_en || title_es);
 
@@ -123,28 +137,43 @@ export async function createProject(formData: FormData): Promise<ActionResult> {
 
   const supabase = createAdminClient();
 
+  // [DEBUG] surface what's coming in so we can diagnose silent failures.
+  console.log('[createProject] hasCover=%s galleryCount=%d title_en=%s',
+    hasCover, galleryFiles.length, title_en);
+
   // 1. INSERT row with cover/gallery null/empty initially (ADR-37)
-  const { data, error } = await supabase.from('projects').insert({
-    slug,
-    title_en,
-    title_es,
-    subtitle_en,
-    subtitle_es,
-    description_en,
-    description_es,
-    cover_image_url: null,
-    gallery_images: [],
-    tags,
-    display_order,
-    published,
-  });
+  // `.select('id').single()` is REQUIRED — without it Supabase v2 returns data:null
+  // and newId stays empty, silently skipping the upload loops below.
+  const { data, error } = await supabase
+    .from('projects')
+    .insert({
+      slug,
+      title_en,
+      title_es,
+      subtitle_en,
+      subtitle_es,
+      description_en,
+      description_es,
+      cover_image_url: null,
+      gallery_images: [],
+      tags,
+      display_order,
+      published,
+      live_url,
+      repo_url,
+    })
+    .select('id')
+    .single();
 
   if (error) {
     return mapDbError(error);
   }
 
-  // data may be null depending on Supabase client version; handle both
-  const newId = (data as Array<{ id: string }> | null)?.[0]?.id ?? '';
+  const newId = (data as { id: string } | null)?.id ?? '';
+  console.log('[createProject] insert result: data=%o error=%o newId=%s', data, error, newId);
+  if (!newId) {
+    return { ok: false, errors: { _form: 'Insert returned no id' } };
+  }
 
   // 2. Upload files if any (ADR-37: rollback on failure)
   // Cast to StorageClient to avoid TypeScript deep inference on typed Supabase client
@@ -232,6 +261,20 @@ export async function updateProject(id: string, formData: FormData): Promise<Act
   const tags = parseTags(formData);
   const display_order = int(formData, 'display_order');
 
+  // Optional production URL — null when omitted, validated when provided.
+  const liveUrlResult = normalizeHttpUrl(str(formData, 'live_url'));
+  if (!liveUrlResult.ok) {
+    return { ok: false, errors: { live_url: liveUrlResult.error } };
+  }
+  const live_url = liveUrlResult.value;
+
+  // Optional source repository URL — same semantics as live_url.
+  const repoUrlResult = normalizeHttpUrl(str(formData, 'repo_url'));
+  if (!repoUrlResult.ok) {
+    return { ok: false, errors: { repo_url: repoUrlResult.error } };
+  }
+  const repo_url = repoUrlResult.value;
+
   // ADR-19: Server-side authoritative slug cleanse
   const slug = slugify(rawSlug || title_en || title_es);
 
@@ -264,6 +307,8 @@ export async function updateProject(id: string, formData: FormData): Promise<Act
       tags,
       display_order,
       published,
+      live_url,
+      repo_url,
     })
     .eq('id', id);
 

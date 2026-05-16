@@ -1,18 +1,24 @@
 {
   "hero": {
-    "title": "Juan Segura — Desarrollador",
-    "tagline": "Construyendo cosas en la web."
+    "title": "David Segura",
+    "tagline": "Diseñando y construyendo productos digitales con criterio."
   },
   "gallery": {
     "empty": "Sin proyectos por ahora — volvé pronto.",
-    "heading": "Galería del proyecto"
+    "heading": "Galería del proyecto",
+    "liveLink": "Abrir sitio en producción",
+    "repoLink": "Ver código en GitHub"
+  },
+  "project": {
+    "visitSite": "Visitar sitio",
+    "viewSource": "Ver código"
   },
   "meta": {
-    "title": "Juan Segura — Portafolio de Developer",
-    "description": "Proyectos y escritos seleccionados."
+    "title": "David Segura — Portafolio de Developer",
+    "description": "Proyectos personales y trabajos freelance de David Segura."
   },
   "header": {
-    "logoAlt": "Inicio del portafolio de Juan Segura"
+    "logoAlt": "Inicio del portafolio de David Segura"
   },
   "nav": {
     "backToGallery": "Volver a la galería"

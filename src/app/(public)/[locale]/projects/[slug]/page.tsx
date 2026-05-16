@@ -87,6 +87,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   // Translations — two namespace calls to preserve stub test contract (ADR-61)
   const tNav = await getTranslations('nav');
   const tGallery = await getTranslations('gallery');
+  const tProject = await getTranslations('project');
 
   // Locale-aware field resolution (FR-136, C-23)
   const title = getLocalizedField(project, 'title', locale as 'en' | 'es');
@@ -118,6 +119,10 @@ export default async function ProjectDetailPage({ params }: Props) {
       galleryUrls={galleryUrls}
       backLinkLabel={tNav('backToGallery')}
       galleryHeading={tGallery('heading')}
+      liveUrl={project.live_url}
+      liveLinkLabel={tProject('visitSite')}
+      repoUrl={project.repo_url}
+      repoLinkLabel={tProject('viewSource')}
     />
   );
 }

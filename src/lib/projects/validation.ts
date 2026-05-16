@@ -30,6 +30,30 @@ export type ValidationResult =
  *   - slug
  *   - cover_image_url (FR-95, fase 2: cover image is now required to publish)
  */
+/**
+ * Normalizes an optional http(s) URL string from form input.
+ * Empty/whitespace → null (field omitted).
+ * Otherwise must parse as an http: or https: URL — returns { ok: false } when not.
+ * Shared by live_url and repo_url admin inputs.
+ */
+export type NormalizeUrlResult =
+  | { ok: true; value: string | null }
+  | { ok: false; error: string };
+
+export function normalizeHttpUrl(raw: string | null | undefined): NormalizeUrlResult {
+  const trimmed = (raw ?? '').trim();
+  if (trimmed === '') return { ok: true, value: null };
+  try {
+    const u = new URL(trimmed);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+      return { ok: false, error: 'Must start with http:// or https://' };
+    }
+    return { ok: true, value: u.toString() };
+  } catch {
+    return { ok: false, error: 'Invalid URL' };
+  }
+}
+
 export function validateForPublish(p: ProjectInput): ValidationResult {
   const errors: Record<string, string> = {};
 

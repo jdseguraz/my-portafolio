@@ -1,18 +1,24 @@
 {
   "hero": {
-    "title": "Juan Segura — Developer",
-    "tagline": "Building thoughtful digital products."
+    "title": "David Segura",
+    "tagline": "Designing and building thoughtful digital products."
   },
   "gallery": {
     "empty": "No projects yet — check back soon.",
-    "heading": "Project gallery"
+    "heading": "Project gallery",
+    "liveLink": "Open live site",
+    "repoLink": "View source on GitHub"
+  },
+  "project": {
+    "visitSite": "Visit site",
+    "viewSource": "View source"
   },
   "meta": {
-    "title": "Juan Segura — Developer Portfolio",
-    "description": "Selected projects and writing."
+    "title": "David Segura — Developer Portfolio",
+    "description": "Selected projects and freelance work by David Segura."
   },
   "header": {
-    "logoAlt": "Juan Segura's portfolio home"
+    "logoAlt": "David Segura's portfolio home"
   },
   "nav": {
     "backToGallery": "Back to gallery"

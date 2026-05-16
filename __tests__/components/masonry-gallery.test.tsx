@@ -18,6 +18,14 @@ import type { Database } from '../../src/lib/supabase/database.types';
 type Project = Database['public']['Tables']['projects']['Row'];
 
 // ---------------------------------------------------------------------------
+// Mock: next-intl/server — MasonryGallery now reads gallery.liveLink translation
+// ---------------------------------------------------------------------------
+vi.mock('next-intl/server', () => ({
+  getTranslations: vi.fn().mockResolvedValue((key: string) => key),
+  setRequestLocale: vi.fn(),
+}));
+
+// ---------------------------------------------------------------------------
 // Mock: ProjectCard — renders a div with data-slug and data-priority attributes
 // ---------------------------------------------------------------------------
 vi.mock('../../src/components/ProjectCard', () => ({
@@ -60,7 +68,7 @@ vi.mock('../../src/components/MasonryGalleryAnimated', () => ({
         ))}
       </div>
       {/* 2-column block */}
-      <div data-testid="layout-2col" className="hidden sm:flex md:hidden gap-6">
+      <div data-testid="layout-2col" className="hidden sm:flex lg:hidden gap-6">
         {columns.two.map((col, ci) => (
           <div key={ci} data-testid={`col-2-${ci}`}>
             {col.map((p) => (
@@ -72,7 +80,7 @@ vi.mock('../../src/components/MasonryGalleryAnimated', () => ({
         ))}
       </div>
       {/* 3-column block */}
-      <div data-testid="layout-3col" className="hidden md:flex gap-6">
+      <div data-testid="layout-3col" className="hidden lg:flex gap-6">
         {columns.three.map((col, ci) => (
           <div key={ci} data-testid={`col-3-${ci}`}>
             {col.map((p, pi) => (
@@ -153,7 +161,6 @@ describe('MasonryGallery — layout distribution', () => {
     const element = await MasonryGallery({ projects: mockProjects, locale: 'en' });
     render(element as React.ReactElement);
 
-    // Use real distributeToColumns to compute expected distribution
     const [col0, col1] = distributeToColumns(mockProjects, 2);
     const col2Block0 = screen.getByTestId('col-2-0');
     const col2Block1 = screen.getByTestId('col-2-1');

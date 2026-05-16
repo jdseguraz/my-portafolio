@@ -52,7 +52,7 @@ export default async function HomePage({ params }: Props) {
   const safeProjects = await getAllPublishedProjects();
 
   return (
-    <div className="min-h-screen px-4 py-12 max-w-7xl mx-auto">
+    <div className="min-h-screen px-4 py-6 sm:py-12 max-w-7xl mx-auto">
       <Hero />
       {safeProjects.length === 0 ? (
         <EmptyState />
